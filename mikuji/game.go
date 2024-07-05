@@ -1,20 +1,19 @@
 package mikuji
 
 import (
+	"bytes"
+	_ "embed"
 	"fmt"
-	"image/color"
 	"math/rand"
 	"sync"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/labstack/gommon/log"
-	"golang.org/x/image/font"
-	"golang.org/x/image/font/opentype"
-
 	"github.com/hajimehoshi/ebiten/v2/examples/resources/fonts"
+
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
-	"github.com/hajimehoshi/ebiten/v2/text"
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
+
 	"github.com/kaepa3/mikuji/mikuji/seiza"
 )
 
@@ -27,7 +26,7 @@ const (
 )
 
 var (
-	arcadeFont font.Face
+	fontFace *text.GoTextFace
 )
 
 type Mode int
@@ -43,20 +42,17 @@ type Game struct {
 	seiza      *seiza.SeizaInfo
 }
 
+//go:embed ADTNumeric.ttc
+var arabicTTF []byte
+
 func init() {
 	rand.NewSource(time.Now().UnixNano())
-	tt, err := opentype.Parse(fonts.MPlus1pRegular_ttf)
+	//font
+	src, err := text.NewGoTextFaceSource(bytes.NewReader(fonts.MPlus1pRegular_ttf))
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
-	arcadeFont, err = opentype.NewFace(tt, &opentype.FaceOptions{
-		Size:    fontSize,
-		DPI:     dpi,
-		Hinting: font.HintingFull,
-	})
-	if err != nil {
-		log.Error(err)
-	}
+	fontFace = &text.GoTextFace{Source: src, Size: 24}
 }
 
 func NewGame() (*Game, error) {
@@ -88,9 +84,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	switch g.mode {
 	case Select:
 		seizaName := g.seiza.GetCurrent()
-		text.Draw(screen, fmt.Sprintf("Seiza:%s", seizaName), arcadeFont, 10, 10, color.White)
+		text.Draw(screen, fmt.Sprintf("Seiza:%s", seizaName), fontFace, nil)
 	case Result:
-		text.Draw(screen, fmt.Sprintf("Result:%s", "fuck!!!"), arcadeFont, 10, 10, color.White)
+		text.Draw(screen, fmt.Sprintf("Result:%s", "fuck!!!"), fontFace, nil)
 	}
 }
 

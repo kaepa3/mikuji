@@ -3,8 +3,9 @@ package main
 import (
 	"log"
 
+	"github.com/kaepa3/mikuji/mikuji"
+
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/kaepa3/mikuji"
 )
 
 func main() {
@@ -12,8 +13,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	ebiten.SetWindowSize(twenty48.ScreenWidth, twenty48.ScreenHeight)
-	ebiten.SetWindowTitle("2048 (Ebitengine Demo)")
+	ebiten.SetWindowSize(mikuji.ScreenWidth, mikuji.ScreenHeight)
+	ebiten.SetWindowTitle("mikuji")
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
 	}

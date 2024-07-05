@@ -51,3 +51,27 @@ func TestSeizaInfo_Next(t *testing.T) {
 		})
 	}
 }
+
+func TestSeizaInfo_Before(t *testing.T) {
+	type fields struct {
+		nowValue Seiza
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{"初期化チェック", fields{nowValue: Aries}, "うお座"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &SeizaInfo{
+				nowValue: tt.fields.nowValue,
+			}
+			s.Before()
+			if got := s.GetCurrent(); got != tt.want {
+				t.Errorf("SeizaInfo.GetCurrent() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

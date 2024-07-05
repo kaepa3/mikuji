@@ -35,8 +35,8 @@ type SeizaInfo struct {
 	nowValue Seiza
 }
 
-func GetSeizaInfo() *SeizaInfo {
-	obj := SeizaInfo{}
+func NewSeizaInfo() *SeizaInfo {
+	obj := SeizaInfo{nowValue: Aries}
 	return &obj
 }
 
@@ -75,5 +75,12 @@ func (s *SeizaInfo) Next() {
 	s.nowValue += 1
 	if s.nowValue > Pisces {
 		s.nowValue = Aries
+	}
+}
+
+func (s *SeizaInfo) Before() {
+	s.nowValue -= 1
+	if s.nowValue < Aries {
+		s.nowValue = Pisces
 	}
 }

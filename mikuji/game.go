@@ -4,7 +4,9 @@ import (
 	"bytes"
 	_ "embed"
 	"fmt"
+	"log"
 	"math/rand"
+	"strconv"
 	"sync"
 	"time"
 
@@ -15,13 +17,14 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 
 	"github.com/kaepa3/mikuji/mikuji/seiza"
+	"github.com/kaepa3/mikuji/mikuji/uranai"
 )
 
 const (
 	ScreenWidth  = 420
 	ScreenHeight = 600
 	boardSize    = 4
-	fontSize     = 10
+	fontSize     = 24
 	dpi          = 72
 )
 
@@ -40,6 +43,7 @@ type Game struct {
 	boardImage *ebiten.Image
 	mode       Mode
 	seiza      *seiza.SeizaInfo
+	result     *uranai.UranaiResult
 }
 
 //go:embed ADTNumeric.ttc
@@ -52,7 +56,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	fontFace = &text.GoTextFace{Source: src, Size: 24}
+	fontFace = &text.GoTextFace{Source: src, Size: fontSize}
 }
 
 func NewGame() (*Game, error) {
@@ -64,6 +68,14 @@ func (g *Game) Update() error {
 	switch g.mode {
 	case Select:
 		if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+			go func() {
+				r, err := uranai.Today()
+				if err != nil {
+					log.Println(err)
+				} else {
+					g.result = r.GetRecord(g.seiza.GetCurrentValue())
+				}
+			}()
 			g.mode = Result
 		} else if inpututil.IsKeyJustPressed(ebiten.KeyUp) {
 			g.seiza.Next()
@@ -73,6 +85,7 @@ func (g *Game) Update() error {
 	case Result:
 		if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
 			g.mode = Select
+			g.result = nil
 		}
 	}
 	return nil
@@ -86,7 +99,23 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		seizaName := g.seiza.GetCurrent()
 		text.Draw(screen, fmt.Sprintf("Seiza:%s", seizaName), fontFace, nil)
 	case Result:
-		text.Draw(screen, fmt.Sprintf("Result:%s", "fuck!!!"), fontFace, nil)
+		if g.result == nil {
+			text.Draw(screen, "Wait....", fontFace, nil)
+		} else {
+			for i, v := range g.result.GetArrayResult() {
+				op := &text.DrawOptions{}
+				op.GeoM.Translate(0, fontSize*float64(i))
+				op.LineSpacing = 48 * 1.5
+				switch val := v.(type) {
+				case string:
+					text.Draw(screen, val, fontFace, op)
+				case int:
+					txt := strconv.Itoa(val)
+					text.Draw(screen, txt, fontFace, op)
+				default:
+				}
+			}
+		}
 	}
 }
 

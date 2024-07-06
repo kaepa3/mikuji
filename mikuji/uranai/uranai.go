@@ -6,18 +6,18 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"reflect"
 	"strconv"
 	"time"
+
+	"github.com/kaepa3/mikuji/mikuji/seiza"
 )
 
 const (
 	baseUrL = "https://api.jugemkey.jp/api/horoscope/free/"
 )
 
-type Uranai struct {
-}
-
-func (u *Uranai) Today() (*HoroScope, error) {
+func Today() (*HoroScope, error) {
 
 	url, err := createUrL()
 	if err != nil {
@@ -37,7 +37,7 @@ func (u *Uranai) Today() (*HoroScope, error) {
 }
 
 type UranaiResult struct {
-	Contetn string      `json:"content"`
+	Content string      `json:"content"`
 	Item    string      `json:"item"`
 	Money   int         `json:"money"`
 	Total   int         `json:"total"`
@@ -49,8 +49,31 @@ type UranaiResult struct {
 	Sign    string      `json:"sign"`
 }
 
+func (u *UranaiResult) GetArrayResult() []interface{} {
+	rv := reflect.ValueOf(*u)
+	num := rv.NumField()
+	list := make([]interface{}, num)
+	for idx := 0; idx < num; idx++ {
+		val := rv.Field(idx)
+		list[idx] = val.Interface()
+	}
+	return list
+}
+
 type HoroScope struct {
 	HoroScope map[string][]UranaiResult `json:"horoscope"`
+}
+
+func (h *HoroScope) GetRecord(sz seiza.Seiza) *UranaiResult {
+	for _, v := range h.HoroScope {
+		for _, val := range v {
+			name := seiza.IndexToString(sz)
+			if val.Sign == name {
+				return &val
+			}
+		}
+	}
+	return nil
 }
 
 func getData(val []byte) (*HoroScope, error) {

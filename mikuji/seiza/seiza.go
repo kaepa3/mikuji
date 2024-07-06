@@ -17,18 +17,18 @@ const (
 	Pisces
 )
 const (
-	AriesText       = "おひつじ座"
-	TaurusText      = "おうし座"
-	GeminiText      = "ふたご座"
-	CancerText      = "かに座"
-	LeoText         = "しし座"
-	VirgoText       = "おとめ座"
-	LibraText       = "てんびん座"
-	ScorpioText     = "さそり座"
-	SagittariusText = "いて座"
-	CapricornText   = "やぎ座"
-	AquariusText    = "みずがめ座"
-	PiscesText      = "うお座"
+	AriesText       = "牡羊座"
+	TaurusText      = "牡牛座"
+	GeminiText      = "双子座"
+	CancerText      = "蟹座"
+	LeoText         = "獅子座"
+	VirgoText       = "乙女座"
+	LibraText       = "天秤座"
+	ScorpioText     = "蠍座"
+	SagittariusText = "射手座"
+	CapricornText   = "山羊座"
+	AquariusText    = "水瓶座"
+	PiscesText      = "魚座"
 )
 
 type SeizaInfo struct {
@@ -40,9 +40,17 @@ func NewSeizaInfo() *SeizaInfo {
 	return &obj
 }
 
+func (s *SeizaInfo) GetCurrentValue() Seiza {
+	return s.nowValue
+}
+
 func (s *SeizaInfo) GetCurrent() string {
+	return IndexToString(s.nowValue)
+}
+
+func IndexToString(sz Seiza) string {
 	var name string
-	switch s.nowValue {
+	switch sz {
 	case Aries:
 		name = AriesText
 	case Taurus:
